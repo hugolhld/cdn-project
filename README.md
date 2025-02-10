@@ -1,1 +1,1 @@
-# cdn-project
+# github.com/hugolhld/cdn-project
