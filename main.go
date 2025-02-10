@@ -1,6 +1,10 @@
 package main
 
 import (
+<<<<<<< HEAD
+=======
+	"cdn-project/database"
+>>>>>>> 962533d (feat: add mongodb)
 	"fmt"
 	"log"
 	"net/http"
@@ -12,6 +16,10 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		start := time.Now()
 		next.ServeHTTP(w, r)
 		log.Printf("%s %s %s", r.Method, r.RequestURI, time.Since(start))
+<<<<<<< HEAD
+=======
+		fmt.Println("Yoyo")
+>>>>>>> 962533d (feat: add mongodb)
 	})
 }
 
@@ -21,6 +29,9 @@ func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	db := database.ConnectDB()
+	fmt.Println("Base de données prête :", db.Name())
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", HealthCheckHandler)
 
