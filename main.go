@@ -1,16 +1,10 @@
 package main
 
 import (
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-	"cdn-project/database"
->>>>>>> 962533d (feat: add mongodb)
-=======
->>>>>>> bab9c8b (feat: add mongodb)
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	routes "github.com/hugolhld/cdn-project/Routes"
 
@@ -18,16 +12,11 @@ import (
 	"github.com/rs/cors"
 )
 
-<<<<<<< HEAD
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		next.ServeHTTP(w, r)
 		log.Printf("%s %s %s", r.Method, r.RequestURI, time.Since(start))
-<<<<<<< HEAD
-=======
-		fmt.Println("Yoyo")
->>>>>>> 962533d (feat: add mongodb)
 	})
 }
 
@@ -36,8 +25,6 @@ func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "OK")
 }
 
-=======
->>>>>>> bab9c8b (feat: add mongodb)
 func main() {
 	router := mux.NewRouter()
 

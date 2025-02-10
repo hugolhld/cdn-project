@@ -10,9 +10,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	configs "cdn-project/Configs"
-	models "cdn-project/Models"
-	responses "cdn-project/Responses"
+	configs "github.com/hugolhld/cdn-project/Configs"
+	models "github.com/hugolhld/cdn-project/Models"
+	responses "github.com/hugolhld/cdn-project/Responses"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"

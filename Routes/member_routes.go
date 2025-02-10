@@ -1,7 +1,7 @@
 package routes
 
 import (
-	controllers "cdn-project/Controllers"
+	controllers "github.com/hugolhld/cdn-project/Controllers"
 
 	"github.com/gorilla/mux"
 )

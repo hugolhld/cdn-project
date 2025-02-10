@@ -1,16 +1,10 @@
 module github.com/hugolhld/cdn-project
 
-<<<<<<< HEAD
-go 1.22.3
-<<<<<<< HEAD
-=======
-=======
 go 1.19
->>>>>>> bab9c8b (feat: add mongodb)
 
 require (
 	github.com/go-playground/validator/v10 v10.24.0
-	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/mux v1.8.1
 	github.com/joho/godotenv v1.5.1
 	github.com/rs/cors v1.11.1
 	go.mongodb.org/mongo-driver v1.17.2
@@ -34,4 +28,3 @@ require (
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 )
->>>>>>> 962533d (feat: add mongodb)
