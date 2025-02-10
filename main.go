@@ -2,15 +2,23 @@ package main
 
 import (
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	"cdn-project/database"
 >>>>>>> 962533d (feat: add mongodb)
+=======
+>>>>>>> bab9c8b (feat: add mongodb)
 	"fmt"
 	"log"
 	"net/http"
-	"time"
+
+	routes "github.com/hugolhld/cdn-project/Routes"
+
+	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
+<<<<<<< HEAD
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -28,15 +36,25 @@ func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "OK")
 }
 
+=======
+>>>>>>> bab9c8b (feat: add mongodb)
 func main() {
-	db := database.ConnectDB()
-	fmt.Println("Base de données prête :", db.Name())
+	router := mux.NewRouter()
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/health", HealthCheckHandler)
+	// Enable CORS using rs/cors middleware
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"Authorization", "Content-Type"},
+	})
 
-	loggedMux := loggingMiddleware(mux)
+	// MongoDB Connection
+	// configs.ConnectDB()
 
-	fmt.Println("Serveur démarré sur :8080")
-	log.Fatal(http.ListenAndServe(":8080", loggedMux))
+	routes.MemberRoutes(router)
+
+	handler := c.Handler(router)
+
+	fmt.Print("Server is running on port 8000 !!!")
+	log.Fatal(http.ListenAndServe(":8000", handler))
 }

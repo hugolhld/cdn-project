@@ -35,3 +35,5 @@ func ConnectDB() *mongo.Database {
 	db = client.Database("mydatabase")
 	return db
 }
+
+func CreateUser()
