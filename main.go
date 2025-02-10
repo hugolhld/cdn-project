@@ -15,14 +15,14 @@ func loggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintln(w, "OK")
 }
 
 func main() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", healthCheckHandler)
+	mux.HandleFunc("/health", HealthCheckHandler)
 
 	loggedMux := loggingMiddleware(mux)
 
