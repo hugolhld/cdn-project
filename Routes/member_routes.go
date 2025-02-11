@@ -1,7 +1,7 @@
-package routes
+package Routes
 
 import (
-	controllers "github.com/hugolhld/cdn-project/Controllers"
+	controllers "cdn-project/Controllers"
 
 	"github.com/gorilla/mux"
 )
@@ -13,5 +13,6 @@ func MemberRoutes(router *mux.Router) {
 	router.HandleFunc("/members", controllers.GetAllMembers()).Methods("GET")
 	router.HandleFunc("/member/{id}", controllers.UpdateMember()).Methods("PUT")
 	router.HandleFunc("/member/{id}", controllers.DeleteMember()).Methods("DELETE")
+	router.HandleFunc(("/health"), controllers.HealthCheck()).Methods("GET")
 
 }

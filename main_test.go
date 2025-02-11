@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	controller "cdn-project/Controllers"
 )
 
 func TestHealthCheckHandler(t *testing.T) {
@@ -13,7 +15,7 @@ func TestHealthCheckHandler(t *testing.T) {
 	}
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(HealthCheckHandler)
+	handler := http.HandlerFunc(controller.HealthCheck())
 
 	handler.ServeHTTP(rr, req)
 

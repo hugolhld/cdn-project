@@ -1,4 +1,4 @@
-package controllers
+package Controllers
 
 import (
 	"context"
@@ -10,15 +10,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	configs "github.com/hugolhld/cdn-project/Configs"
-	models "github.com/hugolhld/cdn-project/Models"
-	responses "github.com/hugolhld/cdn-project/Responses"
+	configs "cdn-project/Configs"
+	models "cdn-project/Models"
+	responses "cdn-project/Responses"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-var memberCollection *mongo.Collection = configs.GetCollection(configs.DB, "members")
+var memberCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
 var validate = validator.New()
 
 func CreateMember() http.HandlerFunc {
@@ -214,5 +214,13 @@ func DeleteMember() http.HandlerFunc {
 		response := responses.MemberResponse{Status: http.StatusOK, Message: "Success", Data: map[string]interface{}{"data": "Member deleted successfully"}}
 		json.NewEncoder(rw).Encode(response)
 
+	}
+}
+
+func HealthCheck() http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		rw.WriteHeader(http.StatusOK)
+		response := responses.MemberResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"data": "Service is up and running"}}
+		json.NewEncoder(rw).Encode(response)
 	}
 }

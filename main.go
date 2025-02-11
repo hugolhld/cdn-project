@@ -4,26 +4,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
-	routes "github.com/hugolhld/cdn-project/Routes"
+	// configs "cdn-project/Configs"
+
+	routes "cdn-project/Routes"
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
-
-func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		next.ServeHTTP(w, r)
-		log.Printf("%s %s %s", r.Method, r.RequestURI, time.Since(start))
-	})
-}
-
-func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "OK")
-}
 
 func main() {
 	router := mux.NewRouter()
