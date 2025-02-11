@@ -14,5 +14,5 @@ func MemberRoutes(router *mux.Router) {
 	router.HandleFunc("/member/{id}", controllers.UpdateMember()).Methods("PUT")
 	router.HandleFunc("/member/{id}", controllers.DeleteMember()).Methods("DELETE")
 	router.HandleFunc(("/health"), controllers.HealthCheck()).Methods("GET")
-
+	router.HandleFunc(("/login"), controllers.LoginMember()).Methods("POST")
 }
