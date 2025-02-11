@@ -38,7 +38,7 @@ services:
       - mongodb
   
   frontend:
-    image: node:18.19
+    image: node:20.17
     container_name: frontend
     build: ./frontend
     ports:
