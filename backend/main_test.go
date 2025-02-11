@@ -5,21 +5,30 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	controller "cdn-project/Controllers"
+	"cdn-project/Configs"
+	controllers "cdn-project/Controllers"
+	"cdn-project/Mocks" // Assure-toi d'importer ton mock
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHealthCheckHandler(t *testing.T) {
+	// Création du mock pour la collection
+	mockCollection := new(Mocks.MockCollection)
+
+	// Remplace la vraie collection par le mock
+	Configs.MemberCollection = mockCollection
+
 	req, err := http.NewRequest("GET", "/health", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(controller.HealthCheck())
+	handler := http.HandlerFunc(controllers.HealthCheck()) // Utilise HealthCheck normalement
 
 	handler.ServeHTTP(rr, req)
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("handler renvoie un mauvais code HTTP: obtenu %v, attendu %v", status, http.StatusOK)
-	}
+	assert.Equal(t, http.StatusOK, rr.Code)
+	assert.JSONEq(t, `{"message": "Server is running"}`, rr.Body.String())
 }
