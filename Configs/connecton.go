@@ -33,10 +33,15 @@ import (
 // }
 
 func ConnectDB() *mongo.Database {
-	mongoURI := "mongodb://admin:password@0.0.0.0:27017/"
+	// mongoURI := "mongodb://admin:password@0.0.0.0:27017/"
+	fmt.Println("🔗 URI de connexion à MongoDB :", EnvMongoURI())
+
+	if EnvMongoURI() == "" {
+		log.Fatal("❌ MONGO_URI n'est pas défini dans le fichier .env")
+	}
 
 	// Options de connexion
-	clientOptions := options.Client().ApplyURI(mongoURI)
+	clientOptions := options.Client().ApplyURI(EnvMongoURI())
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		log.Fatal("❌ Erreur de connexion à MongoDB :", err)
