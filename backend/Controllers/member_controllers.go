@@ -15,8 +15,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	configs "cdn-project/Configs"
-	models "cdn-project/models"
-	responses "cdn-project/responses"
+	models "cdn-project/Models"
+	responses "cdn-project/Responses"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"

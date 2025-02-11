@@ -15,6 +15,7 @@ import (
 
 func main() {
 	router := mux.NewRouter()
+	apiRouter := router.PathPrefix("/api").Subrouter()
 
 	// Enable CORS using rs/cors middleware
 	c := cors.New(cors.Options{
@@ -26,10 +27,10 @@ func main() {
 	// MongoDB Connection
 	// configs.ConnectDB()
 
-	routes.MemberRoutes(router)
+	routes.MemberRoutes(apiRouter)
 
 	handler := c.Handler(router)
 
-	fmt.Print("Server is running on port 8000 !!!")
-	log.Fatal(http.ListenAndServe(":8000", handler))
+	fmt.Print("Server is running on port 8082 !!!")
+	log.Fatal(http.ListenAndServe("0.0.0.0:8082", handler))
 }
