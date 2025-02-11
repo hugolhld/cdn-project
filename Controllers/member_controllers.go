@@ -44,10 +44,11 @@ func CreateMember() http.HandlerFunc {
 		}
 
 		newUser := models.Member{
-			Id:    primitive.NewObjectID(),
-			Name:  member.Name,
-			Email: member.Email,
-			City:  member.City,
+			Id:       primitive.NewObjectID(),
+			Name:     member.Name,
+			Email:    member.Email,
+			City:     member.City,
+			Password: member.Password,
 		}
 		result, err := memberCollection.InsertOne(ctx, newUser)
 		if err != nil {
