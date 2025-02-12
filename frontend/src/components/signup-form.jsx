@@ -7,7 +7,8 @@ import React from "react"
 import { Link, useNavigate } from "react-router"
 import { useSnackbar } from "notistack"
 
-export function SignupForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
+// eslint-disable-next-line react/prop-types
+export function SignupForm({ className, ...props }) {
 
     const { enqueueSnackbar } = useSnackbar()
     const navigate = useNavigate()
@@ -19,7 +20,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
         role: "Paris",
     })
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e) => {
         setData({ ...data, [e.target.id]: e.target.value })
     }
 

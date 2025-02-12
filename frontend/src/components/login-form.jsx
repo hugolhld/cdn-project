@@ -15,9 +15,10 @@ import { useSnackbar } from "notistack"
 import { useAuth } from "../context/AuthContext"
 
 export function LoginForm({
+  // eslint-disable-next-line react/prop-types
   className,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}) {
 
   const navigate = useNavigate()
   const { enqueueSnackbar } = useSnackbar()
@@ -28,7 +29,7 @@ export function LoginForm({
 
   const { login } = useAuth()
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e) => {
     setData({ ...data, [e.target.id]: e.target.value })
   }
 
@@ -93,7 +94,7 @@ export function LoginForm({
                 </div>
                 <Input id="password" type="password" required onChange={handleChange} />
               </div>
-              <Button type="submit" className="w-full" onClick={() => navigate("/dashboard")}>
+              <Button type="submit" className="w-full">
                 Login
               </Button>
             </div>

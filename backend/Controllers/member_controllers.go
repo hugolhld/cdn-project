@@ -346,9 +346,33 @@ func GenerateJWT(email string) (string, error) {
 
 	claims := jwt.MapClaims{
 		"email": email,
-		"exp":   time.Now().Add(time.Hour * 24).Unix(), // Expires in 24 hours
+		"exp":   time.Now().Add(time.Minute * 1).Unix(), // 10 minutes
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(secretKey)
+}
+
+func CheckJWT() http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		tokenString := ExtractToken(r)
+		if tokenString == "" {
+			rw.WriteHeader(http.StatusUnauthorized)
+			response := responses.MemberResponse{Status: http.StatusUnauthorized, Message: "error", Data: map[string]interface{}{"data": "Missing token"}}
+			json.NewEncoder(rw).Encode(response)
+			return
+		}
+
+		_, err := ValidateJWT(tokenString)
+		if err != nil {
+			rw.WriteHeader(http.StatusUnauthorized)
+			response := responses.MemberResponse{Status: http.StatusUnauthorized, Message: "error", Data: map[string]interface{}{"data": "Invalid token"}}
+			json.NewEncoder(rw).Encode(response)
+			return
+		}
+
+		rw.WriteHeader(http.StatusOK)
+		response := responses.MemberResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"data": "Valid token"}}
+		json.NewEncoder(rw).Encode(response)
+	}
 }
