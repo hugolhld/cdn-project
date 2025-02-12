@@ -17,15 +17,11 @@ func main() {
 	router := mux.NewRouter()
 	apiRouter := router.PathPrefix("/api").Subrouter()
 
-	// Enable CORS using rs/cors middleware
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"Authorization", "Content-Type"},
 	})
-
-	// MongoDB Connection
-	// configs.ConnectDB()
 
 	routes.MemberRoutes(apiRouter)
 

@@ -7,23 +7,6 @@ import Login from './views/Login'
 import Register from './views/Register'
 
 function App() {
-  // const onClick = async () => {
-  //   const response = await fetch('/api/members', {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //   })
-
-  //   if (response.ok) {
-  //     const data = await response.json()
-  //     console.log(data)
-  //   } else {
-  //     console.error('Failed to fetch data')
-  //     console.log(response)
-  //   }
-  // }
-
   return (
     <SnackbarProvider>
       <Router>

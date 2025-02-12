@@ -15,7 +15,6 @@ import (
 var dbInstance *mongo.Database
 var dbOnce sync.Once
 
-// InitDB initialise la connexion une seule fois
 func InitDB() *mongo.Database {
 
 	if os.Getenv("GO_ENV") == "test" {
@@ -23,7 +22,7 @@ func InitDB() *mongo.Database {
 		return nil
 	}
 
-	dbOnce.Do(func() { // Assure que la connexion ne se fait qu'une seule fois
+	dbOnce.Do(func() {
 		fmt.Println("🔗 URI de connexion à MongoDB :", EnvMongoURI())
 
 		clientOptions := options.Client().ApplyURI(EnvMongoURI())
@@ -46,7 +45,6 @@ func InitDB() *mongo.Database {
 	return dbInstance
 }
 
-// Définir une interface pour mocker MongoDB
 type CollectionInterface interface {
 	FindOne(ctx context.Context, filter interface{}) *mongo.SingleResult
 	Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) (*mongo.Cursor, error)
@@ -55,7 +53,6 @@ type CollectionInterface interface {
 	UpdateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
 }
 
-// MongoCollection est une implémentation de CollectionInterface
 type MongoCollection struct {
 	Collection *mongo.Collection
 }
@@ -80,7 +77,6 @@ func (m *MongoCollection) UpdateOne(ctx context.Context, filter interface{}, upd
 	return m.Collection.UpdateOne(ctx, filter, update, opts...)
 }
 
-// GetCollection retourne une MongoCollection au lieu de *mongo.Collection
 func GetCollection(collectionName string) CollectionInterface {
 	if os.Getenv("GO_ENV") == "test" {
 		fmt.Println("🟡 Mode test : MongoDB désactivée")
@@ -90,12 +86,4 @@ func GetCollection(collectionName string) CollectionInterface {
 	return &MongoCollection{Collection: InitDB().Collection(collectionName)}
 }
 
-// MemberCollection est maintenant une interface (supporte les mocks)
 var MemberCollection CollectionInterface = GetCollection("users")
-
-// // GetCollection retourne une collection MongoDB
-// func GetCollection(collectionName string) *mongo.Collection {
-// 	return InitDB().Collection(collectionName) // ✅ Appelle InitDB() si nécessaire
-// }
-
-// var MemberCollection *mongo.Collection = GetCollection("users")
