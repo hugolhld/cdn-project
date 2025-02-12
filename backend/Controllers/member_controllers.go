@@ -11,18 +11,19 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 
 	configs "cdn-project/Configs"
-	models "cdn-project/models"
-	responses "cdn-project/responses"
+	models "cdn-project/Models"
+	responses "cdn-project/Responses"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-var MemberCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
+// var configs.MemberCollection *mongo.Collection = configs.GetCollection("users")
+
+// var configs.MemberCollection = "test"
 
 var validate = validator.New()
 
@@ -108,7 +109,7 @@ func CreateMember() http.HandlerFunc {
 			City:     member.City,
 		}
 
-		result, err := MemberCollection.InsertOne(ctx, newUser)
+		result, err := configs.MemberCollection.InsertOne(ctx, newUser)
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
 			response := responses.MemberResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}}
@@ -133,7 +134,7 @@ func GetMember() http.HandlerFunc {
 
 		objId, _ := primitive.ObjectIDFromHex(userId)
 
-		err := MemberCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&user)
+		err := configs.MemberCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&user)
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
 			response := responses.MemberResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}}
@@ -173,7 +174,7 @@ func GetAllMembers() http.HandlerFunc {
 		var members []models.Member
 		defer cancel()
 
-		results, err := MemberCollection.Find(ctx, bson.M{})
+		results, err := configs.MemberCollection.Find(ctx, bson.M{})
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
 			response := responses.MemberResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}}
@@ -229,7 +230,7 @@ func UpdateMember() http.HandlerFunc {
 
 		update := bson.M{"name": user.Name, "email": user.Email, "city": user.City}
 
-		result, err := MemberCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
+		result, err := configs.MemberCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
 
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
@@ -242,7 +243,7 @@ func UpdateMember() http.HandlerFunc {
 		var updatedMember models.Member
 
 		if result.MatchedCount == 1 {
-			err := MemberCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatedMember)
+			err := configs.MemberCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatedMember)
 
 			if err != nil {
 				rw.WriteHeader(http.StatusInternalServerError)
@@ -269,7 +270,7 @@ func DeleteMember() http.HandlerFunc {
 
 		objId, _ := primitive.ObjectIDFromHex(userId)
 
-		result, err := MemberCollection.DeleteOne(ctx, bson.M{"id": objId})
+		result, err := configs.MemberCollection.DeleteOne(ctx, bson.M{"id": objId})
 
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
@@ -293,14 +294,6 @@ func DeleteMember() http.HandlerFunc {
 	}
 }
 
-func HealthCheck() http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {
-		rw.WriteHeader(http.StatusOK)
-		response := responses.MemberResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"data": "Service is up and running"}}
-		json.NewEncoder(rw).Encode(response)
-	}
-}
-
 func LoginMember() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -318,7 +311,7 @@ func LoginMember() http.HandlerFunc {
 		}
 
 		var user models.Member
-		err := MemberCollection.FindOne(ctx, bson.M{"email": loginData.Email}).Decode(&user)
+		err := configs.MemberCollection.FindOne(ctx, bson.M{"email": loginData.Email}).Decode(&user)
 		if err != nil {
 			rw.WriteHeader(http.StatusUnauthorized)
 			response := responses.MemberResponse{Status: http.StatusUnauthorized, Message: "error", Data: map[string]interface{}{"data": "Invalid email or password"}}
@@ -353,9 +346,33 @@ func GenerateJWT(email string) (string, error) {
 
 	claims := jwt.MapClaims{
 		"email": email,
-		"exp":   time.Now().Add(time.Hour * 24).Unix(), // Expires in 24 hours
+		"exp":   time.Now().Add(time.Minute * 1).Unix(), // 10 minutes
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(secretKey)
+}
+
+func CheckJWT() http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		tokenString := ExtractToken(r)
+		if tokenString == "" {
+			rw.WriteHeader(http.StatusUnauthorized)
+			response := responses.MemberResponse{Status: http.StatusUnauthorized, Message: "error", Data: map[string]interface{}{"data": "Missing token"}}
+			json.NewEncoder(rw).Encode(response)
+			return
+		}
+
+		_, err := ValidateJWT(tokenString)
+		if err != nil {
+			rw.WriteHeader(http.StatusUnauthorized)
+			response := responses.MemberResponse{Status: http.StatusUnauthorized, Message: "error", Data: map[string]interface{}{"data": "Invalid token"}}
+			json.NewEncoder(rw).Encode(response)
+			return
+		}
+
+		rw.WriteHeader(http.StatusOK)
+		response := responses.MemberResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"data": "Valid token"}}
+		json.NewEncoder(rw).Encode(response)
+	}
 }
