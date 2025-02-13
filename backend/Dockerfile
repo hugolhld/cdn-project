@@ -29,8 +29,8 @@ COPY --from=builder /app/.env .
 # Ensure the binary is executable
 RUN chmod +x ./main
 
-# Expose the backend port
-EXPOSE 8082
+# # Expose the backend port
+# EXPOSE 8082
 
 # Set the default command
 CMD ["./main"]

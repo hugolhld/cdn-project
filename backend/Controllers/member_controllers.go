@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -14,6 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	configs "cdn-project/Configs"
+	middleware "cdn-project/Middleware"
 	models "cdn-project/Models"
 	responses "cdn-project/Responses"
 
@@ -35,42 +35,6 @@ func HashPassword(password string) (string, error) {
 func CheckPassword(hashedPassword, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	return err == nil
-}
-
-func ValidateJWT(tokenString string) (*jwt.Token, error) {
-	secretKey := []byte(os.Getenv("JWT_SECRET"))
-
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, jwt.ErrSignatureInvalid
-		}
-		return secretKey, nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	if !token.Valid {
-		return nil, jwt.ErrSignatureInvalid
-	}
-
-	return token, nil
-}
-
-func ExtractToken(r *http.Request) string {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		return ""
-	}
-
-	// Expected format: "Bearer <TOKEN>"
-	splitToken := strings.Split(authHeader, " ")
-	if len(splitToken) != 2 || splitToken[0] != "Bearer" {
-		return ""
-	}
-
-	return splitToken[1]
 }
 
 func CreateMember() http.HandlerFunc {
@@ -150,55 +114,52 @@ func GetMember() http.HandlerFunc {
 }
 
 func GetAllMembers() http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {
-		// ✅ Verify JWT token before allowing access
-		tokenString := ExtractToken(r)
-		if tokenString == "" {
-			rw.WriteHeader(http.StatusUnauthorized)
-			response := responses.MemberResponse{Status: http.StatusUnauthorized, Message: "error", Data: map[string]interface{}{"data": "Missing token"}}
-			json.NewEncoder(rw).Encode(response)
-			return
-		}
-
-		// ✅ Validate the token
-		_, err := ValidateJWT(tokenString)
-		if err != nil {
-			rw.WriteHeader(http.StatusUnauthorized)
-			response := responses.MemberResponse{Status: http.StatusUnauthorized, Message: "error", Data: map[string]interface{}{"data": "Invalid token"}}
-			json.NewEncoder(rw).Encode(response)
-			return
-		}
-
-		// ✅ Proceed if token is valid
+	return middleware.ProtectedHandler(func(rw http.ResponseWriter, r *http.Request) {
+		// ✅ Connexion à MongoDB avec timeout
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		var members []models.Member
 		defer cancel()
 
+		var members []models.Member
+
+		// ✅ Lire tous les membres depuis la base de données
 		results, err := configs.MemberCollection.Find(ctx, bson.M{})
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
-			response := responses.MemberResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}}
+			response := responses.MemberResponse{
+				Status:  http.StatusInternalServerError,
+				Message: "error",
+				Data:    map[string]interface{}{"data": err.Error()},
+			}
 			json.NewEncoder(rw).Encode(response)
 			return
 		}
 
-		// ✅ Read from DB efficiently
+		// ✅ Convertir les résultats MongoDB en JSON
 		defer results.Close(ctx)
 		for results.Next(ctx) {
 			var singleUser models.Member
 			if err = results.Decode(&singleUser); err != nil {
 				rw.WriteHeader(http.StatusInternalServerError)
-				response := responses.MemberResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}}
+				response := responses.MemberResponse{
+					Status:  http.StatusInternalServerError,
+					Message: "error",
+					Data:    map[string]interface{}{"data": err.Error()},
+				}
 				json.NewEncoder(rw).Encode(response)
 				return
 			}
 			members = append(members, singleUser)
 		}
 
+		// ✅ Retourner la liste des membres en JSON
 		rw.WriteHeader(http.StatusOK)
-		response := responses.MemberResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"data": members}}
+		response := responses.MemberResponse{
+			Status:  http.StatusOK,
+			Message: "success",
+			Data:    map[string]interface{}{"data": members},
+		}
 		json.NewEncoder(rw).Encode(response)
-	}
+	})
 }
 
 func UpdateMember() http.HandlerFunc {
@@ -355,7 +316,7 @@ func GenerateJWT(email string) (string, error) {
 
 func CheckJWT() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		tokenString := ExtractToken(r)
+		tokenString := middleware.ExtractToken(r)
 		if tokenString == "" {
 			rw.WriteHeader(http.StatusUnauthorized)
 			response := responses.MemberResponse{Status: http.StatusUnauthorized, Message: "error", Data: map[string]interface{}{"data": "Missing token"}}
@@ -363,7 +324,7 @@ func CheckJWT() http.HandlerFunc {
 			return
 		}
 
-		_, err := ValidateJWT(tokenString)
+		_, err := middleware.ValidateJWT(tokenString)
 		if err != nil {
 			rw.WriteHeader(http.StatusUnauthorized)
 			response := responses.MemberResponse{Status: http.StatusUnauthorized, Message: "error", Data: map[string]interface{}{"data": "Invalid token"}}

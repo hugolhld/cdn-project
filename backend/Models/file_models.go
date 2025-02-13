@@ -9,4 +9,5 @@ type File struct {
 	ContentType string             `bson:"content_type" json:"content_type"`
 	Size        int64              `bson:"size" json:"size"`
 	UploadDate  primitive.DateTime `bson:"upload_date" json:"upload_date"`
+	UserId      primitive.ObjectID `bson:"user_id" json:"user_id"`
 }
