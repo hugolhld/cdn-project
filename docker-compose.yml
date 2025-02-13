@@ -13,6 +13,8 @@ services:
     volumes:
       - mongo_data:/data/db
       - ./mongo-init:/docker-entrypoint-initdb.d  # Montage du script d'init
+    networks:
+      - app_network
 
   mongo-express:
     image: mongo-express
@@ -26,16 +28,65 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongodb
     ports:
       - "8081:8081"
-  backend:
+    networks:
+      - app_network
+
+  loadbalancer:
+    build:
+      context: ./loadbalancer
+    container_name: load-balancer
+    ports:
+      - "8080:8080"  # Load Balancer accessible en local
+    depends_on:
+      - backend-1
+      - backend-2
+      - backend-3
+    networks:
+      - app_network
+
+  backend-1:
     image: golang:1.23
-    container_name: backend
+    container_name: backend-1
     build: ./backend
-    env_file:
-      - ./backend/.env
+    environment:
+      - PORT=8082
+      - MONGO_URI=mongodb://admin:password@mongodb:27017
+      - JWT_SECRET=montokenJWT
     ports:
       - "8082:8082"
     depends_on:
       - mongodb
+    networks:
+      - app_network
+  backend-2:
+    image: golang:1.23
+    container_name: backend-2
+    build: ./backend
+    environment:
+      - PORT=8083
+      - MONGO_URI=mongodb://admin:password@mongodb:27017
+      - JWT_SECRET=montokenJWT
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mongodb
+    networks:
+      - app_network
+
+  backend-3:
+    image: golang:1.23
+    container_name: backend-3
+    build: ./backend
+    environment:
+      - PORT=8084
+      - MONGO_URI=mongodb://admin:password@mongodb:27017
+      - JWT_SECRET=montokenJWT
+    ports:
+      - "8084:8084"
+    depends_on:
+      - mongodb
+    networks:
+      - app_network
   
   frontend:
     image: node:20.17
@@ -46,6 +97,8 @@ services:
     command: npm run dev -- --host 0.0.0.0
     depends_on:
       - reverse-proxy
+    networks:
+      - app_network
 
   reverse-proxy:
     image: nginx:1.21
@@ -55,8 +108,13 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - backend
+      - loadbalancer
+    networks:
+      - app_network
 
 volumes:
   mongo_data:
 
+networks:
+  app_network:
+    driver: bridge

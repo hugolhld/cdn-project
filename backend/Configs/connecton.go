@@ -87,3 +87,4 @@ func GetCollection(collectionName string) CollectionInterface {
 }
 
 var MemberCollection CollectionInterface = GetCollection("users")
+var FileCollection CollectionInterface = GetCollection("files")
