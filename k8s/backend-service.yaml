@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend  # Sélectionne tous les pods avec ce label
+  ports:
+    - protocol: TCP
+      port: 8082  # Port exposé par le service
+      targetPort: 8082  # Port utilisé par les pods backend
+  type: LoadBalancer  # Kubernetes gère le Load Balancer automatiquement
