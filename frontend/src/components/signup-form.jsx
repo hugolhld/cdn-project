@@ -27,7 +27,7 @@ export function SignupForm({ className, ...props }) {
     const onSubmit = async (e) => {
         e.preventDefault()
 
-        await fetch('http://localhost/api/member', {
+        await fetch(`${import.meta.env.VITE_API_URL}/api/member`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
