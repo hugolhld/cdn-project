@@ -17,6 +17,7 @@ const Login = () => {
     return (
         <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
             <div className="w-full max-w-sm">
+                Token:{import.meta.env.VITE_API_URL} 123
                 <LoginForm />
             </div>
         </div>
