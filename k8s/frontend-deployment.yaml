@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: cdn-frontend:latest
+          image: cdn-frontend
           imagePullPolicy: Never
           ports:
             - containerPort: 80
